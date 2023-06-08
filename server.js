@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const csv = require('csv-parser');
 const multer = require('multer');
+const { performance } = require('perf_hooks');
 
 const app = express();
 const port = 3000;
@@ -165,11 +166,35 @@ function processText() {
   });
 
   return frequencyData;
+
+  
 }
 
 function calculatePerformance(startTime, endTime) {
-  const elapsedTime = (endTime - startTime) / 1000; // Convert to seconds
-  const performanceData = `Total processing time: ${elapsedTime.toFixed(2)} seconds\n`;
+  // const elapsedTime = (endTime - startTime) / 1000; // Convert to seconds
+  // const performanceData = `Total processing time: ${elapsedTime.toFixed(2)} seconds\n`;
+  // fs.writeFile('performance.txt', performanceData, (err) => {
+  //   if (err) {
+  //     console.error('Error writing performance file:', err);
+  //   } else {
+  //     console.log('Performance file generated successfully');
+  //   }
+  // });
+
+  // const startTime = performance.now();
+
+  // ... your existing code ...
+
+  // Calculate script execution time
+  // const endTime = performance.now();
+  const executionTime = (endTime - startTime) / 1000; // Convert to seconds
+
+  // Get memory usage
+  const memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024; // Convert to MB
+
+  // Generate performance.txt content
+  const performanceData = `Time to process: ${executionTime.toFixed(2)} seconds\nMemory used: ${memoryUsage.toFixed(2)} MB`;
+
   fs.writeFile('performance.txt', performanceData, (err) => {
     if (err) {
       console.error('Error writing performance file:', err);
@@ -187,12 +212,14 @@ function calculatePerformance(startTime, endTime) {
 // });
 
 app.post('/upload', upload.single('file'), (req, res) => {
-  const startTime = new Date().getTime();
+  // const startTime = new Date().getTime();
+  const startTime = performance.now();
 
   processFiles().then(() => {
     const frequencyData = processText();
 
-    const endTime = new Date().getTime();
+    // const endTime = new Date().getTime();
+    const endTime = performance.now();
     calculatePerformance(startTime, endTime);
 
     res.json({ frequencyData });
